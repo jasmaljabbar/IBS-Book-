@@ -111,7 +111,7 @@
 
     <!-- Report Issue and DB Switcher -->
     <div class="window-no-drag flex flex-col gap-2 py-2 px-4">
-      <button
+      <!-- <button
         class="
           flex
           text-sm text-gray-100
@@ -143,7 +143,7 @@
       >
         <feather-icon name="command" class="h-4 w-4 flex-shrink-0" />
         <p>{{ t`Shortcuts` }}</p>
-      </button>
+      </button> -->
 
       <button
         data-testid="change-db"
@@ -156,13 +156,13 @@
           gap-1
           items-center
         "
-        @click="$emit('change-db-file')"
+        @click="onChangeDbClick"
       >
         <feather-icon name="database" class="h-4 w-4 flex-shrink-0" />
         <p>{{ t`Change DB` }}</p>
       </button>
 
-      <button
+      <!-- <button
         class="
           flex
           text-sm text-gray-100
@@ -178,16 +178,16 @@
         <p>
           {{ t`Report Issue` }}
         </p>
-      </button>
+      </button> -->
 
-      <p
+      <!-- <p
         v-if="showDevMode"
-        class="text-xs text-gray-500 select-none cursor-pointer"
+        class="text-xs text-gray-200 select-none cursor-pointer"
         @click="showDevMode = false"
         title="Open dev tools with Ctrl+Shift+I"
       >
         dev mode
-      </p>
+      </p> -->
     </div>
 
     <!-- Hide Sidebar Button -->
@@ -213,6 +213,35 @@
 
     <Modal :open-modal="viewShortcuts" @closemodal="viewShortcuts = false">
       <ShortcutsHelper class="w-form" />
+    </Modal>
+
+
+    <Modal :open-modal="showPasswordModal" @closemodal="showPasswordModal = false">
+      <div class="p-4 w-64">
+        <h3 class="text-lg font-medium mb-4">Enter Password</h3>
+        <input
+          type="password"
+          v-model="passwordInput"
+          class="w-full p-2 border rounded mb-4 text-black"
+          placeholder="Enter password"
+          @keyup.enter="checkPassword"
+        />
+        <div class="flex justify-end gap-2">
+          <button
+            class="px-3 py-1 bg-gray-500 rounded"
+            @click="showPasswordModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-3 py-1 bg-blue-500 text-white rounded"
+            @click="checkPassword"
+          >
+            Submit
+          </button>
+        </div>
+        <p v-if="passwordError" class="text-red-500 mt-2">{{ passwordError }}</p>
+      </div>
     </Modal>
   </div>
 </template>
@@ -255,14 +284,22 @@ export default defineComponent({
       viewShortcuts: false,
       activeGroup: null,
       showDevMode: false,
+      showPasswordModal: false,
+      passwordInput: '',
+      correctPassword: '12345',
+      passwordError: ''
     } as {
       companyName: string;
       groups: SidebarConfig;
       viewShortcuts: boolean;
       activeGroup: null | SidebarRoot;
       showDevMode: boolean;
+      showPasswordModal: boolean;
+      passwordInput: string;
+      correctPassword: string;
+      passwordError: string;
     };
-  },
+},
   computed: {
     appVersion() {
       return fyo.store.appVersion;
@@ -351,6 +388,19 @@ export default defineComponent({
 
       return { path, query: { filters: JSON.stringify(filters) } };
     },
+     onChangeDbClick() {
+      this.showPasswordModal = true;
+      this.passwordInput = '';
+      this.passwordError = '';
+    },
+    checkPassword() {
+      if (this.passwordInput === this.correctPassword) {
+        this.showPasswordModal = false;
+        this.$emit('change-db-file');
+      } else {
+        this.passwordError = 'Incorrect password';
+      }
+    }
   },
 });
 </script>
